@@ -10,7 +10,7 @@ from nltk.tag import pos_tag
 
 class Preprocesador ():
 
-    required_packages = [
+    paquetes_requeridos = [
        'punkt','punkt_tab','stopwords', 'wordnet', 'averaged_perceptron_tagger', 'averaged_perceptron_tagger_eng'
     ]
 
@@ -20,10 +20,12 @@ class Preprocesador ():
         base_path = r"C:\Users\54Y1\AppData\Roaming\nltk_data"
         mapping = {
             "punkt": base_path + "/tokenizers/punkt",
+            "punkt_tab": base_path+ "/tokenizers/punk_tab",
             "stopwords": base_path + "/corpora/stopwords",
             "wordnet": base_path + "/corpora/wordnet",
             "averaged_perceptron_tagger": base_path + "/taggers/averaged_perceptron_tagger",
             "averaged_perceptron_tagger_eng": base_path + "/taggers/averaged_perceptron_tagger_eng"
+            
         }
         return mapping.get(package_name, package_name)
 
@@ -36,7 +38,7 @@ class Preprocesador ():
 
     @classmethod
     def ensure_nltk_data(cls):
-        for package in cls.required_packages:
+        for package in cls.paquetes_requeridos:
             try:
                 # Intenta encontrar el recurso localmente
                 find(f"{cls._resource_path(package)}")

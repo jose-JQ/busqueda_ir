@@ -4,6 +4,8 @@ from ir_models.tfidf.tf_idf import Tfidf
 from sklearn.datasets import fetch_20newsgroups
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+import os
+
 
 def obtener_corpus(path, cantidad=10):
     with open("corpus.txt", "r", encoding="utf-8") as f:
@@ -44,38 +46,45 @@ if __name__ == "__main__":
 
     #Aqui iniciaria el loop 
     #query:
-    query = "Sorry, mike"
-    query_preprocesada = preprocesador.preprocesar_doc(query)
-    # analisis
-    res_tfidf = tfidf_model.cos_sim([' '.join(query_preprocesada)])
-    res_bm25 = bm25_model.obtener_scores(query_preprocesada)
+    os.system('cls' if os.name == 'nt' else 'clear')
+    while True: 
+        
+        query = input("Ingrese la consulta: ")
+        query_preprocesada = preprocesador.preprocesar_doc(query)
+        # analisis
+        res_tfidf = tfidf_model.cos_sim([' '.join(query_preprocesada)])
+        res_bm25 = bm25_model.obtener_scores(query_preprocesada)
 
-    print(len(corpus))
-    print (res_tfidf.size)
-    print (res_bm25.size)
+       # print(len(corpus))
+       # print (res_tfidf.size)
+       # print (res_bm25.size)
 
-    comparacion_df = pd.DataFrame({
-        "documentos":corpus,
-        "cos_sim": res_tfidf,
-        "bm25": res_bm25
-    })
+        comparacion_df = pd.DataFrame({
+            "documentos":corpus,
+            "cos_sim": res_tfidf,
+            "bm25": res_bm25
+        })
 
-    atrr_num = comparacion_df.select_dtypes(include="number").columns
-    scaler = MinMaxScaler()
+        atrr_num = comparacion_df.select_dtypes(include="number").columns
+        scaler = MinMaxScaler()
 
-    norm = scaler.fit_transform(comparacion_df[atrr_num])
-    for i, col in enumerate(atrr_num):
-        comparacion_df[col+"_norm"] = norm[:,i]
+        norm = scaler.fit_transform(comparacion_df[atrr_num])
+        for i, col in enumerate(atrr_num):
+            comparacion_df[col+"_norm"] = norm[:,i]
 
-    comparacion_df["prom"] = (comparacion_df["cos_sim_norm"] + comparacion_df["bm25_norm"])/2
+        comparacion_df["prom"] = (comparacion_df["cos_sim_norm"] + comparacion_df["bm25_norm"])/2
 
-    keys = ["cos_sim", "bm25", "prom"]
-    cantidad = 10
-    for i in comparacion_df.sort_values(by=keys[2], ascending=False).index.values[0:10]:
-        print ("---------------------------------------------------------")
-        print (f"Documento {i}")
-        print ("Contenido:\n", comparacion_df.loc[i,"documentos"])
-        print ("\n Estadísticas:")
-        print ("  - cos_sim:", comparacion_df.loc[i,"cos_sim"])
-        print ("  - bm25",comparacion_df.loc[i,"bm25"] )
-        print ("  - prom:", comparacion_df.loc[i,"prom"])
+        keys = ["cos_sim", "bm25", "prom"]
+        cantidad = 10
+        for i in comparacion_df.sort_values(by=keys[2], ascending=False).index.values[0:10]:
+            print ("---------------------------------------------------------")
+            print (f"Documento {i}")
+            print ("Contenido:\n", comparacion_df.loc[i,"documentos"])
+            print ("\n Estadísticas:")
+            print ("  - cos_sim:", comparacion_df.loc[i,"cos_sim"])
+            print ("  - bm25",comparacion_df.loc[i,"bm25"] )
+            print ("  - prom:", comparacion_df.loc[i,"prom"])
+        
+        print("\n\n\n\n\n")
+        input("Press enter to continue....")
+        print("\n\n\n\n\n\n\n\n\n\n")
