@@ -1,0 +1,16 @@
+nltk
+numpy
+scikit-learn
+rank_bm25
+pandas
+spacy
+"fastapi[standard]"
+node
+npm
+
+# para fastapi
+#fastapi dev main.py
+
+# para front
+#npm install
+#npm run dev
