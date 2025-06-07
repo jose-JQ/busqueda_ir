@@ -28,3 +28,4 @@ __pycache__/
 *.py[cod]
 */__pycache__/
 data/dataset.pkl
+/__pycache__/*
