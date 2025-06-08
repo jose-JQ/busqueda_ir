@@ -27,7 +27,7 @@ export const mockResults: SearchResult[] = [
 export const filterGroups: FilterGroup[] = [
   {
     id: 'metrica',
-    name: 'Search Metric',
+    name: 'Modelo de Búsqueda',
     options: [
       { id: 'metrica-promedio', label: 'Promedio', value: 'promedio' },
       { id: 'metrica-tfidf', label: 'TF-IDF', value: 'tfidf' },

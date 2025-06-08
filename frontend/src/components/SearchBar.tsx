@@ -7,9 +7,16 @@ interface SearchBarProps {
   setQuery: (query: string) => void;
   query: string;
   searchHistory: string[];
+  onDeleteHistoryItem: (item: string) => void; // NUEVO
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch, setQuery, query, searchHistory }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  onSearch,
+  setQuery,
+  query,
+  searchHistory,
+  onDeleteHistoryItem // NUEVO
+}) => {
   const [showHistory, setShowHistory] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +99,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, setQuery, query, search
             }}
             onBlur={() => setInputFocused(false)}
             onKeyDown={handleKeyDown}
-            placeholder="Search for articles, papers, tutorials..."
+            placeholder="Buscar algo acerca de Wordpress"
             className={`
               w-full py-4 pl-3 pr-12 focus:outline-none
               ${theme === 'dark' ? 'bg-gray-800 placeholder-gray-500' : 'bg-white placeholder-gray-400'}
@@ -100,28 +107,34 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, setQuery, query, search
             aria-label="Search query"
           />
           {query && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              className={`absolute right-16 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700`}
-              aria-label="Clear search"
-            >
-              <X size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-            </button>
+            <div className="absolute right-6 flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="p-1 rounded-full hover:bg-red-600 group"
+                aria-label="Clear search"
+              >
+                <X
+                  size={18}
+                  className={`transition-colors duration-200 group-hover:text-white ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                />
+              </button>
+
+              <div className={`w-px h-5 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
+
+              <button
+                type="submit"
+                className="p-1 rounded-full hover:bg-purple-600 group"
+                disabled={!query.trim()}
+                aria-label="Submit search"
+              >
+                <Search
+                  size={18}
+                  className={`transition-colors duration-200 group-hover:text-white ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                />
+              </button>
+            </div>
           )}
-          <button
-            type="submit"
-            className={`
-              ml-auto h-full px-4 flex items-center justify-center 
-              ${query.trim() ? 'bg-purple-600 hover:bg-purple-700 text-white' : 
-                theme === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} 
-              transition-colors duration-200
-            `}
-            disabled={!query.trim()}
-            aria-label="Submit search"
-          >
-            Search
-          </button>
         </div>
       </form>
 
@@ -136,23 +149,38 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, setQuery, query, search
           `}
         >
           <div className={`py-2 px-3 ${theme === 'dark' ? 'text-gray-400 border-gray-700' : 'text-gray-500 border-gray-200'} text-sm border-b`}>
-            Recent searches
+            Búsquedas recientes
           </div>
           <ul>
             {searchHistory.map((item, index) => (
-              <li key={index}>
+              <li key={index} className="flex items-center group">
                 <button
                   type="button"
                   onClick={() => handleHistoryItemClick(item)}
                   className={`
-                    w-full text-left px-3 py-2 flex items-center
+                    flex-1 text-left px-3 py-2 flex items-center
                     ${theme === 'dark' 
                       ? 'hover:bg-gray-700 text-gray-200' 
                       : 'hover:bg-gray-100 text-gray-800'}
                   `}
                 >
                   <Clock size={16} className="mr-2 opacity-70" />
-                  {item}
+                  <span className="truncate">{item}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDeleteHistoryItem(item)}
+                  className={`
+                    p-1 rounded-full ml-1 mr-3 hover:bg-red-600 group
+                    transition-colors duration-200
+                  `}
+                  aria-label={`Eliminar búsqueda "${item}"`}
+                  tabIndex={0}
+                >
+                  <X
+                    size={18}
+                    className={`transition-colors duration-200 group-hover:text-white ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                  />
                 </button>
               </li>
             ))}

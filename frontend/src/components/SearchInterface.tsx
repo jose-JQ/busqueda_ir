@@ -26,7 +26,7 @@ const SearchInterface: React.FC = () => {
     return metricFilter?.value || 'promedio';
   };
 
-  const handleSearch = useCallback(async (searchQuery: string) => {
+  const handleSearch = useCallback(async (searchQuery: string, metricOverride?: string) => {
     if (!searchQuery.trim()) return;
     
     setLoading(true);
@@ -34,7 +34,7 @@ const SearchInterface: React.FC = () => {
     setError(null);
     
     try {
-      const currentMetric = getCurrentMetric();
+      const currentMetric = metricOverride || getCurrentMetric();
       
       // Try to call the real API first
       try {
@@ -82,8 +82,9 @@ const SearchInterface: React.FC = () => {
 
   const handleFilterChange = useCallback((filters: Filter[]) => {
     setActiveFilters(filters);
+    const updatedMetric = filters.find(f => f.type === 'metrica')?.value || 'promedio';
     if (query && hasSearched) {
-      handleSearch(query);
+      handleSearch(query, updatedMetric);
     }
   }, [query, hasSearched, handleSearch]);
 
@@ -100,6 +101,10 @@ const SearchInterface: React.FC = () => {
     }
   }, [query, hasSearched, handleSearch]);
 
+  const handleDeleteHistoryItem = (item: string) => {
+    setSearchHistory(prev => prev.filter(h => h !== item));
+  };
+
   // Calculate pagination
   const indexOfLastResult = currentPage * resultsPerPage;
   const indexOfFirstResult = indexOfLastResult - resultsPerPage;
@@ -112,6 +117,7 @@ const SearchInterface: React.FC = () => {
         setQuery={setQuery} 
         query={query} 
         searchHistory={searchHistory}
+        onDeleteHistoryItem={handleDeleteHistoryItem}
       />
       
       {error && (

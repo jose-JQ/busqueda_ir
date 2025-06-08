@@ -63,7 +63,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onFilterChange, selectedM
         >
           <span className="flex items-center">
             <FilterIcon size={18} className="mr-2" />
-            Search Metrics
+            Métricas de búsqueda
           </span>
           {mobileFiltersOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
@@ -79,9 +79,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onFilterChange, selectedM
         rounded-lg border shadow-sm p-4
       `}>
         <div className="mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold">Search Configuration</h2>
+          <h2 className="text-lg font-semibold">Configuración de búsqueda</h2>
           <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            Select the search metric to use
+            Selecciona el modelo de búsqueda
           </p>
         </div>
         
@@ -137,7 +137,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onFilterChange, selectedM
           <div className="flex items-center">
             <div className={`w-2 h-2 rounded-full mr-2 ${theme === 'dark' ? 'bg-purple-400' : 'bg-purple-600'}`}></div>
             <span className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-200' : 'text-purple-800'}`}>
-              Current: {selectedMetric.toUpperCase()}
+              Seleccionado: {selectedMetric.toUpperCase()}
             </span>
           </div>
         </div>
@@ -151,9 +151,9 @@ const getMetricDescription = (metric: string): string => {
     case 'tfidf':
       return 'Term Frequency-Inverse Document Frequency';
     case 'bm25':
-      return 'Best Matching 25 ranking function';
+      return 'Función "Best Matching 25 ranking"';
     case 'promedio':
-      return 'Average of multiple metrics';
+      return 'Promedio de las múltiples métricas';
     default:
       return '';
   }
