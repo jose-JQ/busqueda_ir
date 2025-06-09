@@ -9,7 +9,26 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_extraction.text import CountVectorizer
 
 class Sri_app () :
+  """
+   Clase principal para la aplicación de Recuperación de Información (RI).
+    Maneja el preprocesamiento, modelado (TF-IDF y BM25), evaluación y búsqueda en un corpus textual.
+  """
+
   def __init__(self,corpus=None, queries=None, qrels=None, preprocesar = False, procesar=False, attr_corpus="text",attr_id="doc_id", attr_query="text", lmt=True):
+    """
+    Inicializa la aplicación RI.
+
+        Parámetros:
+        - corpus: DataFrame del corpus documental.
+        - queries: DataFrame con las consultas.
+        - qrels: DataFrame con las relevancias (ground truth).
+        - preprocesar: Bool para aplicar preprocesamiento.
+        - procesar: Bool para construir modelos TF-IDF y BM25.
+        - attr_corpus: Nombre de la columna de texto en el corpus.
+        - attr_id: Nombre de la columna de identificadores únicos de documentos.
+        - attr_query: Nombre de la columna de texto en las consultas.
+        - lmt: Booleano para usar lematización (True) o stemming (False).
+    """
     self.corpus = corpus
     self.queries = queries
     self.qrels = qrels
@@ -26,6 +45,7 @@ class Sri_app () :
     self.scaler = MinMaxScaler()
     self.metricas_buscar = ['sim_cos', 'bm25_scores', "promedio"]
     self.vectorizer_cv = CountVectorizer()
+    self.attr_query = attr_query
 
     if lmt:
           self.metodo = self.preprocesador.preprocesar_con_lmt
@@ -55,6 +75,16 @@ class Sri_app () :
 
 
   def calcular_metrica(self, modelo, modelo_id):
+    """
+            Calcula precisión, recall y MAP para un modelo dado.
+
+        Parámetros:
+        - modelo: instancia de Metrica_modelo.
+        - modelo_id: nombre del archivo donde guardar los resultados.
+
+        Retorna:
+        - DataFrame con métricas calculadas.
+    """
     pre_recall = modelo.obtener_precision_recall_modelo()
     map_res = modelo.obtener_MAP_modelo()
 
@@ -63,9 +93,27 @@ class Sri_app () :
     return pre_recall
   
   def carga_metrica (self, modelo_id):
+    """
+      Carga métricas previamente guardadas.
+
+        Parámetros:
+        - modelo_id: archivo pickle con métricas.
+
+        Retorna:
+        - DataFrame con métricas.
+    """
     return pd.read_pickle(modelo_id)
   
   def resultados_metricas(self, calcular=False):
+      """
+       Calcula o carga resultados de métricas para TF-IDF y BM25.
+
+        Parámetros:
+        - calcular: si es True, recalcula; si es False, carga de archivo.
+      """
+      if self.text_preprocessed_id not in self.queries.columns:
+          self.queries[self.text_preprocessed_id] = self.queries[self.attr_query].apply(self.metodo)
+
       if calcular:
         self.metricas_tfidf_res = self.calcular_metrica(self.metrica_modelo_tfidf, self.metrica_tfidf_id)
         self.metricas_bm25_res = self.calcular_metrica(self.metrica_modelo_bm25, self.metrica_bm25_id)
@@ -74,6 +122,17 @@ class Sri_app () :
         self.metricas_bm25_res = self.carga_metrica(self.metrica_bm25_id)
   
   def buscar(self, query, k=10, metrica="promedio"):
+    """
+    Realiza una búsqueda sobre el corpus con una consulta dada.
+
+        Parámetros:
+        - query: texto de la consulta.
+        - k: número de documentos a retornar.
+        - metrica: métrica a usar para ordenar resultados ('sim_cos', 'bm25_scores', 'promedio').
+
+        Retorna:
+        - DataFrame con los k documentos más relevantes ordenados.
+    """
     attr= self.corpus.select_dtypes(exclude=['number']).columns.values  # esto es para limpiar las selecciones :)
     if self.attr_id not in attr:
       attr = np.append(attr, self.attr_id)
@@ -106,6 +165,15 @@ class Sri_app () :
     #return docs_recuperados.sort_values('doc_id')
 
   def obtener_diccionario (self, calcular=False):
+    """
+    Obtiene o carga el diccionario de términos del corpus.
+
+        Parámetros:
+        - calcular: si es True, recalcula; si es False, carga de archivo.
+
+        Retorna:
+        - DataFrame con la matriz término-documento.
+    """
     diccionario = None
     if calcular:
       X = self.vectorizer_cv.fit_transform(self.corpus[self.text_preprocessed_id].values)
