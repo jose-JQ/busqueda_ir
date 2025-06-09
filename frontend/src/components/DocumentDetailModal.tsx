@@ -82,7 +82,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
             <FileText className={`h-6 w-6 mr-3 ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`} />
             <div>
               <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                Document Details
+                Detalles del Documento
               </h2>
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 ID: {document.doc_id}
@@ -122,7 +122,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                     {getScoreValue()}
                   </p>
                   <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
-                    Metric: {selectedMetric === 'tfidf' ? 'sim_cos' : selectedMetric === 'bm25' ? 'bm25_scores' : 'promedio'}
+                    Modelo: {selectedMetric === 'tfidf' ? 'sim_cos' : selectedMetric === 'bm25' ? 'bm25_scores' : 'promedio'}
                   </p>
                 </div>
                 <div className={`
@@ -139,7 +139,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
             {/* Title Section */}
             <div>
               <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                Title
+                Título
               </h3>
               <div className={`
                 p-4 rounded-lg border
@@ -157,7 +157,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                  Document Content
+                  Contenido del Documento
                 </h3>
                 <button
                   onClick={() => copyToClipboard(document.text)}
@@ -176,7 +176,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                   ) : (
                     <>
                       <Copy size={14} className="mr-1" />
-                      Copy
+                      Copiar
                     </>
                   )}
                 </button>
@@ -226,7 +226,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                 : 'bg-gray-50 border-gray-200'}
             `}>
               <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                All Available Scores
+                Scores
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {document.promedio !== undefined && (
@@ -270,7 +270,7 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                 : 'bg-gray-50 border-gray-200'}
             `}>
               <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                Document Metadata
+                Metadata del Documento
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

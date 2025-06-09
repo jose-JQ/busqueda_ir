@@ -79,6 +79,8 @@ class Sri_app () :
     print(sim_scores_df.sort_values(by=self.metricas_buscar[0], ascending=False))
     print(sim_scores_df.sort_values(by=self.metricas_buscar[1], ascending=False))
     print(sim_scores_df.sort_values(by=self.metricas_buscar[2], ascending=False))
+    print('Resultados metrica tf-idf: ',self.metricas_tfidf_res)
+    print('Resultados metrica bm-25: ',self.metricas_bm25_res)
     self.dataset[metrica] = sim_scores_df[metrica].values
     
     return self.dataset.sort_values(by=metrica, ascending=False).head(k)

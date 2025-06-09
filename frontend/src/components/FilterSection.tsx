@@ -7,9 +7,11 @@ import { useTheme } from '../context/ThemeContext';
 interface FilterSectionProps {
   onFilterChange: (filters: Filter[]) => void;
   selectedMetric: string;
+  metricasTFIDF: { [key: string]: number };
+  metricasBM25: { [key: string]: number };
 }
 
-const FilterSection: React.FC<FilterSectionProps> = ({ onFilterChange, selectedMetric }) => {
+const FilterSection: React.FC<FilterSectionProps> = ({ onFilterChange, selectedMetric, metricasBM25, metricasTFIDF }) => {
   const { theme } = useTheme();
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({
     metrica: 'promedio'
@@ -127,20 +129,33 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onFilterChange, selectedM
         ))}
         
         {/* Current selection indicator */}
-        <div className={`
-          mt-4 p-3 rounded-lg
-          ${theme === 'dark' 
-            ? 'bg-purple-900/30 border-purple-700' 
-            : 'bg-purple-50 border-purple-200'}
-          border
-        `}>
-          <div className="flex items-center">
-            <div className={`w-2 h-2 rounded-full mr-2 ${theme === 'dark' ? 'bg-purple-400' : 'bg-purple-600'}`}></div>
-            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-200' : 'text-purple-800'}`}>
-              Seleccionado: {selectedMetric.toUpperCase()}
-            </span>
-          </div>
+        
+        <div className={`mt-4 p-3 rounded-lg ${
+            theme === 'dark' ? 'bg-purple-900/30 border-purple-700' : 'bg-purple-50 border-purple-200'
+          } border`}>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center">
+                <div className={`w-2 h-2 rounded-full mr-2 ${theme === 'dark' ? 'bg-purple-400' : 'bg-purple-600'}`}></div>
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-200' : 'text-purple-800'}`}>
+                  Seleccionado: {selectedMetric.toUpperCase()}
+                </span>
+              </div>
+
+              {selectedMetric === 'tfidf' && (
+                <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                  Precision: {metricasTFIDF?.precision?.toFixed(4)}<br />
+                  Recall: {metricasTFIDF?.recall?.toFixed(4)}
+                </div>
+              )}
+              {selectedMetric === 'bm25' && (
+                <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                  Precision: {metricasBM25?.precision?.toFixed(4)}<br />
+                  Recall: {metricasBM25?.recall?.toFixed(4)}
+                </div>
+              )}
+            </div>
         </div>
+
       </div>
     </>
   );

@@ -146,7 +146,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, selectedMetric, o
           <div className={`flex items-center text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
             <span>{document.tags.length} tag{document.tags.length !== 1 ? 's' : ''}</span>
             <span className="mx-2">•</span>
-            <span>Click to view details</span>
+            <span>Click para ver detalles</span>
           </div>
         </div>
       </div>

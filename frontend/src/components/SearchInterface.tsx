@@ -20,6 +20,9 @@ const SearchInterface: React.FC = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [metricasTFIDF, setMetricasTFIDF] = useState<{ [key: string]: number }>({});
+  const [metricasBM25, setMetricasBM25] = useState<{ [key: string]: number }>({});
+
 
   const getCurrentMetric = () => {
     const metricFilter = activeFilters.find(f => f.type === 'metrica');
@@ -38,9 +41,12 @@ const SearchInterface: React.FC = () => {
       
       // Try to call the real API first
       try {
-        const apiResults = await SearchApiService.search(searchQuery, currentMetric, resultsPerPage);
-        setResults(apiResults);
-        setTotalResults(apiResults.length);
+        const apiResponse = await SearchApiService.search(searchQuery, currentMetric, resultsPerPage);
+        setResults(apiResponse.resultados);
+        setTotalResults(apiResponse.resultados.length);
+        setMetricasTFIDF(apiResponse.metricas_tfidf_res);
+        setMetricasBM25(apiResponse.metricas_bm25_res);
+
         setCurrentPage(1);
         
         // Add to search history if not already present
@@ -131,6 +137,8 @@ const SearchInterface: React.FC = () => {
           <FilterSection 
             onFilterChange={handleFilterChange} 
             selectedMetric={getCurrentMetric()}
+            metricasTFIDF={metricasTFIDF}
+            metricasBM25={metricasBM25}
           />
         </div>
         

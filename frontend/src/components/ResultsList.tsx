@@ -62,9 +62,9 @@ const ResultsList: React.FC<ResultsListProps> = ({
         <div className="mx-auto w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mb-4">
           <FileQuestion className="h-8 w-8 text-orange-600 dark:text-orange-300" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">No Results Found</h3>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">No se encontraron resultados</h3>
         <p className="text-gray-600 dark:text-gray-300">
-          We couldn't find any results for "{query}". Try different keywords or adjust your search metric.
+          We couldn't find any results for "{query}". Pruebe diferentes palabras clave o ajuste su métrica de búsqueda.
         </p>
       </div>
     );
@@ -74,7 +74,7 @@ const ResultsList: React.FC<ResultsListProps> = ({
     <>
       <div>
         <h2 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">
-          Found {results.length} results for "{query}" using {selectedMetric.toUpperCase()}
+          Se encontraron {results.length} resultados para "{query}" con el modelo {selectedMetric.toUpperCase()}
         </h2>
         <div className="space-y-6">
           {results.map((document) => (

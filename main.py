@@ -41,8 +41,17 @@ def consultar(input:Consulta):
     if not input.k:
         input.k = 10
      
-    resultado = sri_app.buscar(input.query,input.k,input.metrica)
-    
+    resultado = sri_app.buscar(input.query, input.k, input.metrica)
     data = resultado.to_dict(orient="records")
     
-    return JSONResponse(content=data)
+
+    metricas_tfidf_res_dict = sri_app.metricas_tfidf_res.to_dict()
+    metricas_tfidf_res = list(metricas_tfidf_res_dict.values())[0] if metricas_tfidf_res_dict else {}
+
+    metricas_bm25_res = sri_app.metricas_bm25_res.to_dict()
+
+    return JSONResponse(content={
+        "resultados": data,
+        "metricas_tfidf_res": metricas_tfidf_res,
+        "metricas_bm25_res": metricas_bm25_res
+    })
