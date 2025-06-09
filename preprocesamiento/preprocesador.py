@@ -1,15 +1,14 @@
 import nltk
 from nltk.corpus import stopwords, wordnet
 from nltk.data import find
+import spacy #muy lentoooo
+from nltk import regexp_tokenize
+from nltk.stem import SnowballStemmer
 from nltk.stem import WordNetLemmatizer
-from unidecode import unidecode
-import re
-from nltk.tokenize import word_tokenize 
-from nltk.stem import PorterStemmer
 from nltk.tag import pos_tag
 
 class Preprocesador ():
-
+    attr_preprocesado = "text_preproccessed"
     paquetes_requeridos = [
        'punkt','punkt_tab','stopwords', 'wordnet', 'averaged_perceptron_tagger', 'averaged_perceptron_tagger_eng'
     ]
@@ -25,85 +24,97 @@ class Preprocesador ():
             "wordnet": base_path + "/corpora/wordnet",
             "averaged_perceptron_tagger": base_path + "/taggers/averaged_perceptron_tagger",
             "averaged_perceptron_tagger_eng": base_path + "/taggers/averaged_perceptron_tagger_eng"
-            
+
         }
         return mapping.get(package_name, package_name)
 
 
     def __init__(self):
-        self.ensure_nltk_data()
+        self.descargar_paquetes_necesarios()
         self.stop_words= set(stopwords.words('english'))
-        self.stemmer = PorterStemmer()
+        self.stemmer = SnowballStemmer("english")
+        self.lematizer_spacy =  spacy.load("en_core_web_sm")
         self.lematizer =  WordNetLemmatizer()
 
     @classmethod
-    def ensure_nltk_data(cls):
-        for package in cls.paquetes_requeridos:
+    def descargar_paquetes_necesarios(cls):
+        spacy.cli.download("en_core_web_sm")
+        for paquete in cls.paquetes_requeridos:
             try:
                 # Intenta encontrar el recurso localmente
-                find(f"{cls._resource_path(package)}")
+                find(f"{cls._resource_path(paquete)}")
             except LookupError:
-                print(f"Descargando: {package}")
-                nltk.download(package)
-    
-    def tokenizar (self, doc):
-        return word_tokenize(doc)
-    
-    """
-    Corpus -> en listas
-    """
-    def normalizar (self, doc): 
-        def procesar_token(token):
-            token = token.lower() #lower
-            token = unidecode(token)
+                print(f"Descargando: {paquete}")
+                nltk.download(paquete)
 
-            if not (bool(re.fullmatch(r'[^a-z\s]', token))): # filtrado de signos de puntuación y carácteres especiales
-                return token
-            else:
-                return None
-        
-        return list(filter(None, map(procesar_token, doc)))
+    def normalizar_tokenizar(self, doc):
+        return regexp_tokenize(doc.lower(), r"[a-zA-Z]+")
 
-
-    def drop_stopwords(self,doc):
-        def borrar_stopwords(doc):
-            return [t for t in doc if not t in self.stop_words]
-
-        return borrar_stopwords(doc)
+    def eliminar_stopwords(self,tokens):
+        tokens = tokens.copy()
+        for token in self.stop_words:
+            if token in tokens:
+                tokens.remove(token)
+        return tokens
 
     def stemming (self, doc):
         def steamming_doc (doc):
             return [self.stemmer.stem(token) for token in doc]
-        
+
         return steamming_doc(doc)
-    
-    def lemeatizacion(self, doc):
+
+
+    def lematizar(self,tokens):
+        tagged = pos_tag(tokens)
+
         def get_wordnet_pos(tag):
-            if tag.startswith('J'):
-                return wordnet.ADJ
-            elif tag.startswith('V'):
-                return wordnet.VERB
-            elif tag.startswith('N'):
+                if tag.startswith('J'):
+                    return wordnet.ADJ
+                elif tag.startswith('V'):
+                    return wordnet.VERB
+                elif tag.startswith('N'):
+                    return wordnet.NOUN
+                elif tag.startswith('R'):
+                    return wordnet.ADV
                 return wordnet.NOUN
-            elif tag.startswith('R'):
-                return wordnet.ADV
-            else:
-                return wordnet.NOUN  # por defecto
 
-        def lematizar_doc (doc):
-            tag = pos_tag(doc)
-            return [self.lematizer.lemmatize(word, get_wordnet_pos(pos)) for word, pos in tag]
-        
-        return lematizar_doc(doc)
-    
+        return [
+                self.lematizer.lemmatize(word, get_wordnet_pos(pos))
+                for word, pos in tagged
+            ]
 
-    def preprocesar_doc (self, doc):
-        token = self.tokenizar(doc)
-        normalizar = self.normalizar(token)
-        sin_stopword = self.drop_stopwords(normalizar)
-        lematizado = self.lemeatizacion(sin_stopword)
-        stemm = self.stemming(lematizado)
-        return stemm
-    
-    def preprocesar_corpus(self,corpus):
-        return [self.preprocesar_doc(doc) for doc in corpus]
+    def lematizar_spacy (self, tokens):
+      return     [token.lemma_ for token in self.lematizer_spacy(' '.join(tokens)) if not token.is_stop and not token.is_punct]
+
+
+    def preprocesar_con_lmt (self, doc):
+        tokens = self.normalizar_tokenizar(doc)
+        wr_stopword = self.eliminar_stopwords(tokens)
+        return  ' '.join(self.lematizar(wr_stopword))
+
+    def preprocesar_con_lmt_spacy (self, doc):
+        tokens = self.normalizar_tokenizar(doc)
+        wr_stopword = self.eliminar_stopwords(tokens)
+        return  ' '.join(self.lematizar_spacy(wr_stopword))
+
+    def preprocesar_con_stm(self, doc):
+        tokens = self.normalizar_tokenizar(doc)
+        wr_stopword = self.eliminar_stopwords(tokens)
+        return ' '.join(self.stemming(wr_stopword))
+
+    def preprocesar_corpus(self,corpus, attr, attr_new=attr_preprocesado,lmt=True):
+        metodo = self.preprocesar_con_lmt
+        if not lmt:
+            metodo = self.preprocesar_con_stm
+
+        corpus[attr_new] = corpus[attr].apply(lambda x: metodo(x))
+
+        return corpus
+
+    def preprocesar_corpus_spacy (self, corpus, attr, attr_new=attr_preprocesado + "_spacy", lmt=True):
+        metodo = self.preprocesar_con_lmt_spacy
+        if not lmt:
+            metodo = self.preprocesar_con_stm
+
+        corpus[attr_new] = corpus[attr].apply(lambda x: metodo(x))
+        return corpus

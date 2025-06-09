@@ -1,90 +1,57 @@
-from preprocesamiento.preprocesador import Preprocesador
-from ir_models.bm25.bm25 import Bm25
-from ir_models.tfidf.tf_idf import Tfidf
-from sklearn.datasets import fetch_20newsgroups
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-import os
+#quiero usar FastAPI
+from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
+from .sri import Sri_app
+# App
+sri_app  = None
+
+#Fast Api
+app = FastAPI()
+
+@app.on_event("startup")
+def init_once():
+    global sri_app
+    sri_app = Sri_app()
+    print("App SRI cargada correctamente...:D")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # o "*" para permitir todos (no recomendado en producción)
+    allow_credentials=True,
+    allow_methods=["*"],  # o ["POST"] 
+    allow_headers=["*"],
+)
+
+class Consulta(BaseModel):
+    query:str
+    metrica: Optional[str] = None #sri_app.metricas_buscar[2]
+    k: Optional[int] = None
 
 
-def obtener_corpus(path, cantidad=10):
-    with open("corpus.txt", "r", encoding="utf-8") as f:
-        contenido = f.read()
-        documentos = contenido.split("|||")
-
-    if cantidad=="max":
-        return documentos
-    else:
-        return documentos[:cantidad]
+#Endpoint
+@app.post("/consultar")
+def consultar(input:Consulta):
+    global sri_app
+    print(input)
+    if not input.metrica:
+        input.metrica = sri_app.metricas_buscar[-1]
+    if not input.k:
+        input.k = 10
+     
+    resultado = sri_app.buscar(input.query, input.k, input.metrica)
+    data = resultado.to_dict(orient="records")
     
 
-if __name__ == "__main__":
-    inicializar = False # Aqui toca cambiar cuando es la primera vez
-    preprocesador = Preprocesador()
-    
-    if inicializar:
-        #Carga de datos
-        newsgroups = fetch_20newsgroups(subset='all', remove=('headers', 'footers', 'quotes'))
-        newsgroupsdocs = newsgroups.data
-        corpus = newsgroupsdocs
+    metricas_tfidf_res_dict = sri_app.metricas_tfidf_res.to_dict()
+    metricas_tfidf_res = list(metricas_tfidf_res_dict.values())[0] if metricas_tfidf_res_dict else {}
 
-        corpus_df = pd.DataFrame({"documento": newsgroupsdocs})
-        corpus_df.to_pickle("datos.pkl")
+    metricas_bm25_res = sri_app.metricas_bm25_res.to_dict()
 
-        #Preprocesamiento
-        corpus_preprocesado = preprocesador.preprocesar_corpus(corpus)
-
-        #Modelo 1:
-        tfidf_model = Tfidf([' '.join(doc) for doc in corpus_preprocesado]) #[' '.join(doc) for doc in corpus_preprocesado]
-        #Modelo 2:
-        bm25_model = Bm25(corpus_preprocesado) #corpus_preprocesado
-    else :
-        tfidf_model = Tfidf()
-        bm25_model = Bm25()
-        corpus_df = pd.read_pickle("datos.pkl")
-        corpus = corpus_df["documento"].values
-
-    #Aqui iniciaria el loop 
-    #query:
-    os.system('cls' if os.name == 'nt' else 'clear')
-    while True: 
-        
-        query = input("Ingrese la consulta: ")
-        query_preprocesada = preprocesador.preprocesar_doc(query)
-        # analisis
-        res_tfidf = tfidf_model.cos_sim([' '.join(query_preprocesada)])
-        res_bm25 = bm25_model.obtener_scores(query_preprocesada)
-
-       # print(len(corpus))
-       # print (res_tfidf.size)
-       # print (res_bm25.size)
-
-        comparacion_df = pd.DataFrame({
-            "documentos":corpus,
-            "cos_sim": res_tfidf,
-            "bm25": res_bm25
-        })
-
-        atrr_num = comparacion_df.select_dtypes(include="number").columns
-        scaler = MinMaxScaler()
-
-        norm = scaler.fit_transform(comparacion_df[atrr_num])
-        for i, col in enumerate(atrr_num):
-            comparacion_df[col+"_norm"] = norm[:,i]
-
-        comparacion_df["prom"] = (comparacion_df["cos_sim_norm"] + comparacion_df["bm25_norm"])/2
-
-        keys = ["cos_sim", "bm25", "prom"]
-        cantidad = 10
-        for i in comparacion_df.sort_values(by=keys[2], ascending=False).index.values[0:10]:
-            print ("---------------------------------------------------------")
-            print (f"Documento {i}")
-            print ("Contenido:\n", comparacion_df.loc[i,"documentos"])
-            print ("\n Estadísticas:")
-            print ("  - cos_sim:", comparacion_df.loc[i,"cos_sim"])
-            print ("  - bm25",comparacion_df.loc[i,"bm25"] )
-            print ("  - prom:", comparacion_df.loc[i,"prom"])
-        
-        print("\n\n\n\n\n")
-        input("Press enter to continue....")
-        print("\n\n\n\n\n\n\n\n\n\n")
+    return JSONResponse(content={
+        "resultados": data,
+        "metricas_tfidf_res": metricas_tfidf_res,
+        "metricas_bm25_res": metricas_bm25_res
+    })
