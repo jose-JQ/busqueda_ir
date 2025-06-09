@@ -29,12 +29,13 @@ class Preprocesador ():
         return mapping.get(package_name, package_name)
 
 
-    def __init__(self):
+    def __init__(self, attr_id="doc_id"):
         self.descargar_paquetes_necesarios()
         self.stop_words= set(stopwords.words('english'))
         self.stemmer = SnowballStemmer("english")
         self.lematizer_spacy =  spacy.load("en_core_web_sm")
         self.lematizer =  WordNetLemmatizer()
+        self.attr_id = attr_id
 
     @classmethod
     def descargar_paquetes_necesarios(cls):
@@ -109,6 +110,9 @@ class Preprocesador ():
 
         corpus[attr_new] = corpus[attr].apply(lambda x: metodo(x))
 
+        if self.attr_id not in corpus.columns:
+            corpus[self.attr_id] = [str(i) for i in range(len(corpus))]
+
         return corpus
 
     def preprocesar_corpus_spacy (self, corpus, attr, attr_new=attr_preprocesado + "_spacy", lmt=True):
@@ -117,4 +121,8 @@ class Preprocesador ():
             metodo = self.preprocesar_con_stm
 
         corpus[attr_new] = corpus[attr].apply(lambda x: metodo(x))
+
+        if self.attr_id not in corpus.columns:
+            corpus[self.attr_id] = [str(i) for i in range(len(corpus))]
+        
         return corpus
