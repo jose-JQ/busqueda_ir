@@ -1,6 +1,9 @@
 # 🔍Sistema de Recuperación de Información (SRI)
 Este proyecto implementa un Sistema de Recuperación de Información (SRI) basado en los modelos TF-IDF y BM25, evaluando métricas como precisión y recall, y desplegando una interfaz de usuario moderna en React junto con un backend en FastAPI.
 
+## Video demostrativo
+[Video demostrativo del proyecto](https://youtu.be/WZv0WgsqoTw "Título alternativo")
+
 ### 📂 Estructura del Proyecto
 - Backend: FastAPI
 - Frontend: React + TypeScript
