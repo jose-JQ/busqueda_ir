@@ -55,7 +55,7 @@ npm run dev
 Interfaz accesible en:
 🌐 http://localhost:5173 (o el puerto que indique la consola)
 
-###📊 Métricas de Evaluación
+### 📊 Métricas de Evaluación
 El sistema expone métricas de evaluación de los modelos implementados. Estas métricas se calculan automáticamente y se muestran en la interfaz gráfica al seleccionar el modelo correspondiente:
 
 | Modelo | Precisión | Recall   |
@@ -64,7 +64,7 @@ El sistema expone métricas de evaluación de los modelos implementados. Estas m
 | BM25   | `0.00942` | `0.4009` |
 
 
-###🧠 Tecnologías Utilizadas
+### 🧠 Tecnologías Utilizadas
 - Python / FastAPI – Backend moderno y rápido.
 
 - Scikit-learn / Pandas – Procesamiento y modelado de datos.
