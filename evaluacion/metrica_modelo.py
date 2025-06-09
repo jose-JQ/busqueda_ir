@@ -52,3 +52,19 @@ class Metrica_modelo ():
 
     promedios = self.queries_df[['recall', 'precision']].mean()
     return promedios
+
+  def obtener_MAP_query(self, query_id, query_procesada, k=50):
+    hits = 0
+    docs_relevantes = self.obtener_relevantes(query_id)
+    docs_recuperados = self.recuperar_k_docs_indices(query_procesada, k)
+
+    sum_precisions = 0
+    for i, doc_id in enumerate(docs_recuperados):
+        if doc_id in docs_relevantes:
+            hits += 1
+            sum_precisions += hits / (i + 1)
+    return sum_precisions / hits if hits > 0 else 0
+  
+  def obtener_MAP_modelo (self, k=50):
+    self.queries_df['ap'] = self.queries_df.apply(lambda row: self.obtener_MAP_query(row[self.key_query_id], row[self.key_query], k), axis=1)
+    return self.queries_df['ap'].sum()/len(self.queries_df)
